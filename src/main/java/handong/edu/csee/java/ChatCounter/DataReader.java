@@ -1,75 +1,189 @@
-package handong.edu.csee.java.ChatCounter;// Package name for ChatCounter
 
-import java.io.File;// Import file library
-import java.util.ArrayList;// import ArrayList library
+package handong.edu.csee.java.ChatCounter;// package name of ChatCounter
 
-// Read get data class 
+
+import org.apache.commons.cli.*;// import  org.apache.commons.cli library
+
+import java.io.*;// imports java.io library
+
+import java.util.*;// imports java.util library
+
+/**
+ * DataReader class is the main class having the main method it reads the file 
+
+ * @author 
+ */
+// DataReader class the main class
 public class DataReader {
+	private static String inputMydir; // input directory file 
+	private static String outputMyfile; // output directory file 
 
-	public static void main(String[] args) {
+	/**
+	 * This is the main method implement all the class
+	 * @param 
+	 */
 
-		DataReader myReader = new DataReader();// instantiate DataReader Class 
-		DataReaderForTXT readTXT = new DataReaderForTXT();
-		DataReaderForCSV readCSV = new DataReaderForCSV();
+	public static void main(String[] args) {// main method to implement all the class 
 
-		myReader.getData(args[0]);// Run getData Method
+		Options myOptions = setUpOptions(); // instance CreateOption 
 
 
+		if(myOptions(myOptions, args)){	
+			DataReader myReader = new DataReader(); // instantiate DataReader class
+			ArrayList<String> storeListName = myReader.receiveData(inputMydir); // stores the list of names 
+			MessageFilter myFilter = new MessageFilter(storeListName); // instantiate MessageFilter class
+
+			myFilter.computingName(); // call method of MessageFilter class
+
+			HashMap<String,Integer> messageCounter = myFilter.recieveHashMap(); // stores HashMap message counter
+			storeListName = myFilter.recieveName(); // call method recieveName in MessageFilter class
+
+			DataWriter myWriter = new DataWriter(messageCounter,storeListName); // instantiate DataWriter class
+			File outputFile = new File(outputMyfile); 
+			myWriter.myFile(outputFile); //call method from DataWriter class
+		}
 	}
 
-	// method as arrayList
-	public ArrayList<String> getData(String strDir){
+	/**
+	 * This is the receiveData() method
 
-		//(1) getDirectory
+	 * @param 
+	 * @return
+	 */
+	// receiveData method
+	public ArrayList<String> receiveData(String strDir){
+
+		//call method to get the directory name
 		File myDir = getDirectory(strDir);
+		//get file 
+		File[] file = getListOfFilesFromDirectory(myDir); 
 
-		//(2) get File
-		File[] file = getListOfFileFromDirectory(myDir);
+		ArrayList<String> listOfNames = readFiles(file); 
 
-		//(3)Read file
-		ArrayList<String> messages = readFile(file);
-
-		return messages;// return messages
+		return listOfNames; // returns the list of names
 	}
 
-	// method File 
-	private File getDirectory(String strDir) {
+	/**
+	 * This is the getDirectory() method
 
-		File myDirectory = new File(strDir);
-		return myDirectory;// return the object 
-
+	 * @param 
+	 * @return
+	 */
+	// getDirectory method
+	private File getDirectory(String strDir){
+		File myDirectory = new File(strDir); // creates File 
+		return myDirectory; // returns file
 	}
 
-	private File[] getListOfFileFromDirectory(File dataDir) {
-		return dataDir.listFiles();// return listFile 
-
+	/**
+	 * This is the getListOfFilesFromDirectory() method
+	 *
+	 * @param
+	 * @return
+	 */
+	// getListOfFilesFromDirectory method
+	private File[] getListOfFilesFromDirectory(File dataDir){
+		return dataDir.listFiles(); // returns list of files
 	}
 
-	private ArrayList<String> readFile(File[] files){
+	/**
+	 * This is the readFiles() method
+	 * 
+	 * @param 
+	 * @return 
+	 */
+	// readFiles method as ArrayList
+	private ArrayList<String> readFiles(File[] files){
+		ArrayList<String> listOfNames = new ArrayList<String>(); // ArrayList listofNames store list of names
 
-		ArrayList<String> message = new ArrayList<String>();//instantiated
-		DataReaderForTXT readTXT = new DataReaderForTXT();// instantiate DataReaderTXT class
-		DataReaderForCSV readCSV = new DataReaderForCSV();// instantiate DataReaderCSV class
+		DataReaderForTXT readTXT = new DataReaderForTXT(); //  instantiate DataReaderForTXT class
+		DataReaderForCSV readCSV = new DataReaderForCSV(); // instantiate  DataReaderForCSV class
 
 
-		for(File file : files) {// loop check file .txt & .csv
-			if(file.toString().contains("txt")) {
-				readTXT.AddMessages(readCSV.recieveMessages());// pass recieveMessages from txt file 
-				readTXT.aTime(readCSV.recieveTime());// pass recieveTime from txt file
-				readTXT.readFileTXT(file);// read file txt
-				message.addAll(readTXT.recieveName());//add name of message from file txt
+		for(File file : files) {//  loop to go through  file
 
+			if(file.toString().contains("csv")) {// if that file contains csv
 
+				readCSV.getMessages(readTXT.receiveMessages()); // passes the  message from the txt 
+				readCSV.readFilesCSV(file); // reads the file 
+				listOfNames.addAll(readCSV.receiveNames()); // adds list of names from the csv 
 			}
-			else if(file.toString().contains("csv")) {
-				readCSV.aMessages(readTXT.recieveMessages());// pass recieveMessage from csv file
-				readCSV.readFiles(file); // read csv file
-				message.addAll(readCSV.recieveName());//add name of message from file csv
+
+			else if (file.toString().contains("txt")){// if that file contains txt
+				readTXT.getMessages(readCSV.receiveMessages()); // passes the  message from csv 
+				readTXT.readFileTXT(file); // reads the file 
+				listOfNames.addAll(readTXT.receiveNames()); // adds  list of names  from the txt 
 			}
 		}
-		return message;// return message
+		return listOfNames; // returns list of names
 	}
 
+	/**
+	 * This is the createOptions() method.
+	 * 
+	 * @return
+	 */
+	// createOptions method as Option
+	public static Options setUpOptions() {
+		Options options = new Options(); // instantiate Options class 
+		options.addOption(Option.builder("i").longOpt("inputdir") // calls addOption
+				.desc("Set a directory path that contains input files")
+				.hasArg() // checks arguments
+				.argName("Directory path") //  argument name
+				.required() // the option is required
+				.build()); // builds the option
+
+		options.addOption(Option.builder("o").longOpt("outputfile") // calls addOption 
+				.desc("Set a directory path that contains output files") 
+				.argName("File path") // argument name
+				.required() //  option required
+				.build()); // builds the option
+		return options; // returns  options
+	}
+
+	/**
+	 * This is the myPrinting() method
+
+	 * @param options
+	 */
+	// myPrint method
+	public static void myprinting(Options options) {
+
+		HelpFormatter formatter = new HelpFormatter(); // instantiate HelpFormatter
+		String header = "CLI test program"; // set the header
+		String footer ="\nPlease report issues at https://github.com/sekkaro/ChatCounter"; // sets the  footer
+		formatter.printHelp("CLIExample", header, options, footer, true); // calls  printHelp method
+	}
+
+	/**
+	 * This is the parseOptions() method
+
+	 * @param 
+	 * @param 
+	 * @return 
+	 */
+	// myOptions method
+	public static boolean myOptions(Options options, String[] args) {
+		CommandLineParser myParser = new DefaultParser(); // instantiate DefaulParser class
+
+		// try block 
+		try {
+
+			CommandLine cmd = myParser.parse(options, args); // command line
+
+			inputMydir = cmd.getOptionValue("i"); // stores the option 
+			outputMyfile = cmd.getOptionValue("o"); // stores the option 
+
+		} 
+
+		catch (Exception e) {// catch Exception
+
+			myprinting(options); //myPrinting statement
+			return false; // return false
+		}
+
+		return true; // returns true
+	}
 
 
 }

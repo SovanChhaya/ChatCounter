@@ -1,103 +1,150 @@
-package handong.edu.csee.java.ChatCounter;// Package name for ChatCounter
 
-import java.io.*;// import java.io library
-import java.util.*;// import java.util library
-import java.util.regex.Matcher;// import util.regex.Matcher library
-import java.util.regex.Pattern;// import java.util.regex.pattern
-
-public class DataReaderForTXT {
-
-	String message;// instance variable
-	String studentName;// instance variable
-	int minute, hour,day, month,year; // instance variable
-	boolean name =false; // instance variable
+package handong.edu.csee.java.ChatCounter;// package name of ChatCounter
 
 
-	ArrayList<String> readMessages = new ArrayList<String>();//list all the message in chat
-	ArrayList<String> readNames= new ArrayList<String>();// list of the name in chat message 
-	ArrayList<String>messageTime = new ArrayList<String>();// list of time 
+import java.io.*;// imports java.io library
 
-	Pattern myPattern1 = Pattern.compile("-+\\s(\\d+).\\s(\\d).\\s(\\d+).\\s.+\\s-+");
-	Pattern myPattern2 = Pattern.compile("\\[(.+)\\]\\s\\[(.+)\\s(\\d+):(\\d+)\\]\\s(.+)");// deal the date 
+import java.util.*;// imports java.util library
 
-	//method
-	public void readFileTXT(File file) {    
+import java.util.regex.*;// imports java.util.regex library
 
-		try {
+/**
+ * DataReaderForTXT class to implement  txt files.
+ * 
+ * @author 
+ *
+ */
+
+public class DataReaderForTXT {// DataReaderForTXT class
+
+	private String myMessages,myName; //instance variable
+	int minute,day, year,month,hour; //instance variable
+	boolean readName = false; // instance variable
+	private ArrayList<String> myNames = new ArrayList<String>(); // list of names
+	private ArrayList<String> txtMessages = new ArrayList<String>(); // list of  messages
+	Pattern myPattern1 = Pattern.compile("\\[(.+)\\]\\s\\[(.+)\\s(\\d+):(\\d+)\\]\\s(.+)"); 
+	Pattern myPattern2 = Pattern.compile("-+\\s(\\d+).\\s(\\d).\\s(\\d+).\\s.+\\s-+"); //dealing with the date
+
+
+	/**
+	 * This is the readFilesTXT() method
+	 *
+	 * @param 
+	 */
+	// readFilesTXT method
+	public void readFileTXT(File file) {
+		myNames.clear(); // clear the list names
+
+		try {// try block
 			BufferedReader inputStream = new BufferedReader(
-					new  InputStreamReader(
-							new FileInputStream(file),"UTF8"));	// instantiate the BufferedReader class and read UTF8	
-			String line;// local variable
-			while((line = inputStream.readLine()) != null  ) {
-				Matcher myMatcher1 = myPattern1.matcher(line);// check line
-				Matcher myMatcher2 = myPattern2.matcher(line);//check line
+					new InputStreamReader(
+							new FileInputStream(file),"UTF-8")); // instance of BufferedReader class and reads it in UTF-8 form
+			String line; //local variable
 
-				if (myMatcher1.find()) {
-					studentName = myMatcher1.group(1); // store a group of name
-					minute = Integer.parseInt(myMatcher1.group(4));//store a group of minute
-					message = myMatcher1.group(5);
-					hour = Integer.parseInt(myMatcher1.group(3));
-					if(myMatcher1.group(2).contains(message)) {
-						hour =Integer.parseInt(myMatcher1.group(3))+12;
+			while((line=inputStream.readLine())!=null) {
+				Matcher myMatcher1 = myPattern1.matcher(line); // matcher to check  in the line
+				Matcher myMatcher2 = myPattern2.matcher(line); // matcher to check  in the line
 
+				if(myMatcher2.find()) {// if myMatcher2 is find
+					// store the day
+					day = Integer.parseInt(myMatcher2.group(3)); 
+					// store the month
+					month = Integer.parseInt(myMatcher2.group(2)); 
+					// store the year 
+					year = Integer.parseInt(myMatcher2.group(1)); 
+
+
+				}
+
+
+				if(myMatcher1.find()) {// if myMatcher1 is find
+					// store the hour
+					hour = Integer.parseInt(myMatcher1.group(3)); 
+					// store the myMessages
+					myMessages = myMatcher1.group(5); 
+					// store the minute
+					minute = Integer.parseInt(myMatcher1.group(4));
+					// store the name
+					myName = myMatcher1.group(1); 
+
+
+
+
+
+					if(myMessages.equals("??")) {//if the (myMessages equals to the locate"??"
+
+						myMessages = "Photo"; 
 					}
 
-				}
-				else if (myMatcher2.find()) {
-					year = Integer.parseInt(myMatcher2.group(1));
-					month = Integer.parseInt(myMatcher2.group(2));
-					day = Integer.parseInt(myMatcher2.group(3));
+					if(myMatcher1.group(2).contains("??")&&hour==12) {// if the second group 
+						hour = 0;
+					}
 
-				}
-
-				else if(readMessages.contains(year+"-"+month+"-"+day+""+hour+":"+minute+""+studentName+""+message)) {
-					readMessages.add(year+"-"+month+"-"+day+""+hour+":"+minute+""+studentName+""+message);
-					name= true;
-				}
-				else if(name) {
-					readNames.add(studentName);
-					name = false;
+					if(myMatcher1.group(2).contains("??")&&hour!=12) {// if the second group
+						hour = Integer.parseInt(myMatcher1.group(3))+12; // sets the value of hour as the third group 
+					}
 
 
+
+
+					if(!txtMessages.contains(year+"-"+month+"-"+day+" "+hour+":"+minute+" "+myName+" "+myMessages)) {// if the message does not contain 
+						txtMessages.add(year+"-"+month+"-"+day+" "+hour+":"+minute+" "+myName+" "+myMessages); //  add to the list
+						readName = true; // set the readName to true
+					}
+
+					if(readName) {// if the readName is true,
+						myNames.add(myName); // add that name value to list
+						readName=false; // set the value of readName false
+					}
 				}
 			}
-			inputStream.close();// stop the out put
-		}catch(IOException e) {// catch Exception
-			e.printStackTrace();// print the error
-		}	
-		readNames.clear();
+			inputStream.close(); // close the inputStream
+		} 
 
-	}
-	//method 
-	public void AddMessages(ArrayList<String> readMessages) {
-		for(String message : readMessages) {
-			if(!this.readMessages.contains(message)) {
-				this.readMessages.add(message);
-			}
+		catch (IOException e) {// catch exception
+			e.printStackTrace(); //print the error
 		}
 	}
-	// method
-	public void aTime(ArrayList<String> time) {
-		for(String line : time) {
-			if(!this.messageTime.contains(line)) {
-				this.messageTime.add(line);
 
+	/**
+	 * This is the getMessages() method
+	 *
+	 * @param myMessages 
+	 */
+	// getMessages method
+	public void getMessages(ArrayList<String> myMessages) {
+
+		for(String message : myMessages) {// loop to check message from parameter
+
+
+			if(!this.txtMessages.contains(message)) {// if the allMessages of this class does not not contain 
+				this.txtMessages.add(message); // add that message to  message 			}
 			}
 		}
 
 	}
-	// ArrayList Constructor
-	public ArrayList<String>recieveMessages(){
-		return readMessages;// return read messages
+
+	/**
+	 * This is the receiveNames() method
+	 *
+	 * @return 
+	 */
+	// method receiveName
+	public ArrayList<String> receiveNames(){
+		return myNames; // return myNames
 	}
-	// ArrayList Constructor
-	public ArrayList<String>recieveName(){
-		return readNames;// return readName 
+
+
+	/**
+	 * This is the receiveMessages() method
+
+	 * @return 
+	 */
+	// getMessages method
+	public ArrayList<String> receiveMessages(){
+		return txtMessages; // return txtMessages
 	}
 
 
 }
-
-
-
 
