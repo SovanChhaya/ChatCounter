@@ -54,17 +54,17 @@ public class DataReader {
 
 		for(File file : files) {// loop check file .txt & .csv
 			if(file.toString().contains("txt")) {
-				readTXT.aMessages(readCSV.recieveMessages());// pass recieveMessages from txt file 
-				readTXT.aTime(readCSV.recieveTime());
-				readTXT.readFileTXT(file);
-				message.addAll(readTXT.recieveName());
+				readTXT.AddMessages(readCSV.recieveMessages());// pass recieveMessages from txt file 
+				readTXT.aTime(readCSV.recieveTime());// pass recieveTime from txt file
+				readTXT.readFileTXT(file);// read file txt
+				message.addAll(readTXT.recieveName());//add name of message from file txt
 
 
 			}
 			else if(file.toString().contains("csv")) {
-				readCSV.aMessages(readTXT.recieveMessages());
-				readCSV.readFiles(file);
-				message.addAll(readCSV.recieveName());
+				readCSV.aMessages(readTXT.recieveMessages());// pass recieveMessage from csv file
+				readCSV.readFiles(file); // read csv file
+				message.addAll(readCSV.recieveName());//add name of message from file csv
 			}
 		}
 		return message;// return message

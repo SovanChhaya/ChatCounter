@@ -1,40 +1,40 @@
-package handong.edu.csee.java.ChatCounter;
+package handong.edu.csee.java.ChatCounter;// Package name for ChatCounter
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.*;// import java.io library
+import java.util.*;// import java.util library
+import java.util.regex.Matcher;// import util.regex.Matcher library
+import java.util.regex.Pattern;// import java.util.regex.pattern
 
 public class DataReaderForTXT {
 
-	String message;
-	String studentName;
-	int minute, hour,day, month,year;
-	boolean name =false;
+	String message;// instance variable
+	String studentName;// instance variable
+	int minute, hour,day, month,year; // instance variable
+	boolean name =false; // instance variable
 
 
-	ArrayList<String> readMessages = new ArrayList<String>();
-	ArrayList<String> readNames= new ArrayList<String>();
-	ArrayList<String>messageTime = new ArrayList<String>();
+	ArrayList<String> readMessages = new ArrayList<String>();//list all the message in chat
+	ArrayList<String> readNames= new ArrayList<String>();// list of the name in chat message 
+	ArrayList<String>messageTime = new ArrayList<String>();// list of time 
 
 	Pattern myPattern1 = Pattern.compile("-+\\s(\\d+).\\s(\\d).\\s(\\d+).\\s.+\\s-+");
-	Pattern myPattern2 = Pattern.compile("\\[(.+)\\]\\s\\[(.+)\\s(\\d+):(\\d+)\\]\\s(.+)");
+	Pattern myPattern2 = Pattern.compile("\\[(.+)\\]\\s\\[(.+)\\s(\\d+):(\\d+)\\]\\s(.+)");// deal the date 
 
-
+	//method
 	public void readFileTXT(File file) {    
 
 		try {
 			BufferedReader inputStream = new BufferedReader(
 					new  InputStreamReader(
-							new FileInputStream(file),"UTF8"));		
-			String line;
+							new FileInputStream(file),"UTF8"));	// instantiate the BufferedReader class and read UTF8	
+			String line;// local variable
 			while((line = inputStream.readLine()) != null  ) {
-				Matcher myMatcher1 = myPattern1.matcher(line);
-				Matcher myMatcher2 = myPattern2.matcher(line);
+				Matcher myMatcher1 = myPattern1.matcher(line);// check line
+				Matcher myMatcher2 = myPattern2.matcher(line);//check line
 
 				if (myMatcher1.find()) {
-					studentName = myMatcher1.group(1);
-					minute = Integer.parseInt(myMatcher1.group(4));
+					studentName = myMatcher1.group(1); // store a group of name
+					minute = Integer.parseInt(myMatcher1.group(4));//store a group of minute
 					message = myMatcher1.group(5);
 					hour = Integer.parseInt(myMatcher1.group(3));
 					if(myMatcher1.group(2).contains(message)) {
@@ -61,22 +61,22 @@ public class DataReaderForTXT {
 
 				}
 			}
-			inputStream.close();
-		}catch(IOException e) {
-			e.printStackTrace();
+			inputStream.close();// stop the out put
+		}catch(IOException e) {// catch Exception
+			e.printStackTrace();// print the error
 		}	
 		readNames.clear();
 
 	}
-
-	public void aMessages(ArrayList<String> readMessages) {
+	//method 
+	public void AddMessages(ArrayList<String> readMessages) {
 		for(String message : readMessages) {
 			if(!this.readMessages.contains(message)) {
 				this.readMessages.add(message);
 			}
 		}
 	}
-
+	// method
 	public void aTime(ArrayList<String> time) {
 		for(String line : time) {
 			if(!this.messageTime.contains(line)) {
@@ -86,12 +86,13 @@ public class DataReaderForTXT {
 		}
 
 	}
-
+	// ArrayList Constructor
 	public ArrayList<String>recieveMessages(){
-		return readMessages;
+		return readMessages;// return read messages
 	}
+	// ArrayList Constructor
 	public ArrayList<String>recieveName(){
-		return readNames;
+		return readNames;// return readName 
 	}
 
 
