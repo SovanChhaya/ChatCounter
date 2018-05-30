@@ -1,5 +1,6 @@
 package handong.edu.csee.java.ChatCounter;
 
-public class MessageFilter {
+public class MessageFilter extends ChatMessageCounter{
+	
 
 }
